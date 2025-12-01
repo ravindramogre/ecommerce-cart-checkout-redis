@@ -19,6 +19,7 @@ export interface Cart {
 
 export interface Order {
   id: ID;
+  orderNumber: number;
   userId: ID;
   items: CartItem[];
   subtotalCents: number;

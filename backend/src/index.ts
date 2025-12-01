@@ -2,6 +2,7 @@ import express from "express";
 import bodyParser from "body-parser";
 import { seedProducts } from "./seedProducts";
 import productsRouter from "./routes/products";
+import cors from "cors";
 import cartRouter from "./routes/cart";
 import checkoutRouter from "./routes/checkout";
 import adminRouter from "./routes/admin";
@@ -9,6 +10,7 @@ import { redis } from "./redisClient";
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
 // Routes
 app.use("/api/v1/products", productsRouter);

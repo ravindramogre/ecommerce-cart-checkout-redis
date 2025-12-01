@@ -41,8 +41,12 @@ router.post("/", async (req, res) => {
 
     const total = subtotal - discount;
 
+    // Increment order counter and get order number
+    const orderCount = await redis.incr("global:ordersCounter");
+
     const order = await createOrder({
       userId,
+      orderNumber: orderCount,
       items: cart.items,
       subtotalCents: subtotal,
       discountCents: discount,
@@ -56,9 +60,7 @@ router.post("/", async (req, res) => {
     }
 
     // Nth order coupon logic
-    const orderCount = await redis.incr("global:ordersCounter");
     let newCoupon = null;
-
     const N = 5;
     if (orderCount % N === 0) {
       newCoupon = await generateNthOrderCoupon(order.id, userId);

@@ -1,0 +1,69 @@
+import React, { createContext, useContext, useEffect, useState, useCallback } from "react";
+import * as api from "../api";
+
+const CartContext = createContext(null);
+
+export function useCart() {
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within CartProvider");
+  return ctx;
+}
+
+export function CartProvider({ children }) {
+  const [cart, setCart] = useState({ items: [] });
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const refresh = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [cartData, productsData] = await Promise.all([
+        api.fetchCart(),
+        api.fetchProducts()
+      ]);
+      setCart(cartData);
+      setProducts(productsData);
+    } catch (e) {
+      console.error("CartProvider refresh failed:", e);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
+  async function addToCart(productId, quantity = 1) {
+    const res = await api.addToCart(productId, quantity);
+    // backend returns updated cart
+    if (res) setCart(res);
+    return res;
+  }
+
+  async function applyCoupon(code) {
+    const res = await api.applyCoupon(code);
+    await refresh();
+    return res;
+  }
+
+  async function doCheckout() {
+    const res = await api.checkout();
+    await refresh();
+    return res;
+  }
+
+  const value = {
+    cart,
+    products,
+    loading,
+    refresh,
+    addToCart,
+    applyCoupon,
+    checkout: doCheckout
+  };
+
+  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+}
+
+export default CartContext;
