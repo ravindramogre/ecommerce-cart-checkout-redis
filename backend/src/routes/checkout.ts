@@ -61,7 +61,7 @@ router.post("/", async (req, res) => {
 
     // Nth order coupon logic
     let newCoupon = null;
-    const N = 5;
+    const N = 3;
     if (orderCount % N === 0) {
       newCoupon = await generateNthOrderCoupon(order.id, userId);
     }
@@ -72,7 +72,8 @@ router.post("/", async (req, res) => {
     res.json({ order, generatedCoupon: newCoupon });
   } catch (e) {
     await lock.release();
-    res.status(500).json({ error: e.toString() });
+    const errorMessage = e instanceof Error ? e.message : String(e);
+    res.status(500).json({ error: errorMessage });
   }
 });
 

@@ -1,5 +1,5 @@
 import express from "express";
-import { addItemToCart, getCart, saveCart } from "../services/cartService";
+import { addItemToCart, getCart, saveCart, removeItemFromCart, reduceItemQuantity } from "../services/cartService";
 import { getProduct } from "../services/productService";
 
 const router = express.Router();
@@ -31,6 +31,27 @@ router.post("/apply-coupon", async (req, res) => {
   await saveCart(cart);
 
   res.json({ message: "Coupon applied", cart });
+});
+
+router.post("/items/:productId/remove", async (req, res) => {
+  const userId = req.header("x-user-id");
+  if (!userId) return res.status(401).json({ message: "User ID required" });
+
+  const { productId } = req.params;
+  const cart = await removeItemFromCart(userId, productId);
+  res.json(cart);
+});
+
+router.post("/items/:productId/reduce", async (req, res) => {
+  const userId = req.header("x-user-id");
+  if (!userId) return res.status(401).json({ message: "User ID required" });
+
+  const { productId } = req.params;
+  const { quantity } = req.body;
+  const qty = quantity || 1;
+
+  const cart = await reduceItemQuantity(userId, productId, qty);
+  res.json(cart);
 });
 
 export default router;

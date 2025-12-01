@@ -53,6 +53,18 @@ export function CartProvider({ children }) {
     return res;
   }
 
+  async function removeItem(productId) {
+    const res = await api.removeFromCart(productId);
+    if (res) setCart(res);
+    return res;
+  }
+
+  async function reduceItem(productId, quantity = 1) {
+    const res = await api.reduceCartItem(productId, quantity);
+    if (res) setCart(res);
+    return res;
+  }
+
   const value = {
     cart,
     products,
@@ -60,7 +72,9 @@ export function CartProvider({ children }) {
     refresh,
     addToCart,
     applyCoupon,
-    checkout: doCheckout
+    checkout: doCheckout,
+    removeItem,
+    reduceItem
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

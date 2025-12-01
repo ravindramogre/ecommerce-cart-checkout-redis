@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useCart } from "../cart/CartContext";
 
 export default function CartView() {
-  const { cart, products, loading, applyCoupon, checkout, refresh } = useCart();
+  const { cart, products, loading, applyCoupon, checkout, refresh, removeItem, reduceItem } = useCart();
   const [couponInput, setCouponInput] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [generatedCoupon, setGeneratedCoupon] = useState(null);
@@ -107,14 +107,18 @@ export default function CartView() {
                   style={{
                     display: "flex",
                     justifyContent: "space-between",
-                    marginBottom: 8
+                    alignItems: "center",
+                    marginBottom: 12,
+                    padding: 10,
+                    backgroundColor: "#f9f9f9",
+                    borderRadius: 6
                   }}
                 >
-                  <div>
+                  <div style={{ flex: 1 }}>
                     <div>
                       <strong>{p ? p.name : item.productId}</strong>
                     </div>
-                    <div>
+                    <div style={{ fontSize: 12, color: "#666", marginTop: 4 }}>
                       Qty: {item.quantity}
                       {p && (
                         <>
@@ -123,7 +127,37 @@ export default function CartView() {
                       )}
                     </div>
                   </div>
-                  <div>₹ {(lineCents / 100).toFixed(2)}</div>
+                  <div style={{ textAlign: "right", marginRight: 12 }}>
+                    ₹ {(lineCents / 100).toFixed(2)}
+                  </div>
+                  <div style={{ display: "flex", gap: 6 }}>
+                    <button
+                      onClick={() => reduceItem(item.productId, 1)}
+                      style={{
+                        padding: "6px 10px",
+                        fontSize: 12,
+                        backgroundColor: "#fff3cd",
+                        border: "1px solid #ffc107",
+                        borderRadius: 4,
+                        cursor: "pointer"
+                      }}
+                    >
+                      −
+                    </button>
+                    <button
+                      onClick={() => removeItem(item.productId)}
+                      style={{
+                        padding: "6px 10px",
+                        fontSize: 12,
+                        backgroundColor: "#f8d7da",
+                        border: "1px solid #dc3545",
+                        borderRadius: 4,
+                        cursor: "pointer"
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </li>
               );
             })}

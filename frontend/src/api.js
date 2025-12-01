@@ -65,3 +65,21 @@ export async function checkout() {
   );
   return res.data; // { order, generatedCoupon }
 }
+
+export async function removeFromCart(productId) {
+  const res = await api.post(
+    `/cart/items/${productId}/remove`,
+    {},
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}
+
+export async function reduceCartItem(productId, quantity = 1) {
+  const res = await api.post(
+    `/cart/items/${productId}/reduce`,
+    { quantity },
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}

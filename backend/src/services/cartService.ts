@@ -24,3 +24,25 @@ export async function addItemToCart(userId: string, productId: string, qty: numb
 export async function clearCart(userId: string) {
   await redis.del(`cart:${userId}`);
 }
+
+export async function removeItemFromCart(userId: string, productId: string) {
+  const cart = await getCart(userId);
+  cart.items = cart.items.filter((i) => i.productId !== productId);
+  await saveCart(cart);
+  return cart;
+}
+
+export async function reduceItemQuantity(userId: string, productId: string, qty: number) {
+  const cart = await getCart(userId);
+  const item = cart.items.find((i) => i.productId === productId);
+
+  if (item) {
+    item.quantity -= qty;
+    if (item.quantity <= 0) {
+      cart.items = cart.items.filter((i) => i.productId !== productId);
+    }
+  }
+
+  await saveCart(cart);
+  return cart;
+}
