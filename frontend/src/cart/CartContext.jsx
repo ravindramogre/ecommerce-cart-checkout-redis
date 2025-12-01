@@ -13,16 +13,19 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState({ items: [] });
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [availableCoupons, setAvailableCoupons] = useState([]);
 
   const refresh = useCallback(async () => {
     try {
       setLoading(true);
-      const [cartData, productsData] = await Promise.all([
+      const [cartData, productsData, couponsData] = await Promise.all([
         api.fetchCart(),
-        api.fetchProducts()
+        api.fetchProducts(),
+        api.fetchAvailableCoupons()
       ]);
       setCart(cartData);
       setProducts(productsData);
+      setAvailableCoupons(couponsData);
     } catch (e) {
       console.error("CartProvider refresh failed:", e);
     } finally {
@@ -69,6 +72,7 @@ export function CartProvider({ children }) {
     cart,
     products,
     loading,
+    availableCoupons,
     refresh,
     addToCart,
     applyCoupon,

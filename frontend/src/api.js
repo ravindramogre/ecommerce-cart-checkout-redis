@@ -83,3 +83,8 @@ export async function reduceCartItem(productId, quantity = 1) {
   );
   return res.data;
 }
+
+export async function fetchAvailableCoupons() {
+  const res = await api.get("/cart/available-coupons");
+  return res.data.coupons;
+}

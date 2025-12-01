@@ -33,3 +33,18 @@ export async function generateNthOrderCoupon(orderId: string, userId: string) {
 
   return coupon;
 }
+
+export async function getAvailableCoupons() {
+  const allCouponIds = await redis.lrange("coupons:ids", 0, -1);
+  const available: Coupon[] = [];
+
+  for (const code of allCouponIds) {
+    const c = await getCoupon(code);
+    if (c && !c.used) {
+      available.push(c);
+    }
+  }
+
+  // Return only the most recent available coupon (max 1)
+  return available.length > 0 ? [available[available.length - 1]] : [];
+}

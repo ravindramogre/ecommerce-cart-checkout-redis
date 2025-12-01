@@ -1,6 +1,7 @@
 import express from "express";
 import { addItemToCart, getCart, saveCart, removeItemFromCart, reduceItemQuantity } from "../services/cartService";
 import { getProduct } from "../services/productService";
+import { getAvailableCoupons } from "../services/couponService";
 
 const router = express.Router();
 
@@ -52,6 +53,11 @@ router.post("/items/:productId/reduce", async (req, res) => {
 
   const cart = await reduceItemQuantity(userId, productId, qty);
   res.json(cart);
+});
+
+router.get("/available-coupons", async (req, res) => {
+  const coupons = await getAvailableCoupons();
+  res.json({ coupons });
 });
 
 export default router;

@@ -1,11 +1,13 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useCart } from "../cart/CartContext";
+import Toast from "./Toast";
 
 export default function CartView() {
-  const { cart, products, loading, applyCoupon, checkout, refresh, removeItem, reduceItem } = useCart();
+  const { cart, products, loading, applyCoupon, checkout, refresh, removeItem, reduceItem, availableCoupons } = useCart();
   const [couponInput, setCouponInput] = useState("");
   const [checkoutLoading, setCheckoutLoading] = useState(false);
   const [generatedCoupon, setGeneratedCoupon] = useState(null);
+  const [showToast, setShowToast] = useState(false);
 
   function getProductById(id) {
     return products.find((p) => p.id === id);
@@ -53,6 +55,9 @@ export default function CartView() {
       if (newCoupon) {
         message += `\n\nYou received a new coupon: ${newCoupon.code} (10% off on next order).`;
         setGeneratedCoupon(newCoupon);
+        setShowToast(true);
+      } else {
+        setGeneratedCoupon(null);
       }
 
       alert(message);
@@ -71,28 +76,23 @@ export default function CartView() {
   return (
     <div>
       <h2>Cart</h2>
-      
-      {generatedCoupon && (
-        <div style={{
-          backgroundColor: "#d4edda",
-          border: "2px solid #28a745",
-          borderRadius: 8,
-          padding: 12,
-          marginBottom: 16,
-          textAlign: "center"
-        }}>
-          <div style={{ color: "#155724", fontWeight: "bold", fontSize: 18 }}>
-            🎉 Congratulations! You got a coupon!
-          </div>
-          <div style={{ color: "#155724", fontSize: 24, marginTop: 8, fontFamily: "monospace" }}>
-            {generatedCoupon.code}
-          </div>
-          <div style={{ color: "#155724", fontSize: 12, marginTop: 8 }}>
-            10% off on your next order
-          </div>
-        </div>
-      )}
 
+      {showToast && generatedCoupon && (
+        <Toast
+          message={
+            <div>
+              <div style={{ color: "#155724", fontSize: 18, fontFamily: "monospace", fontWeight: "bold", marginBottom: 8 }}>
+                {generatedCoupon.code}
+              </div>
+              <div style={{ color: "#155724", fontSize: 12 }}>
+                10% off on your next order
+              </div>
+            </div>
+          }
+          onClose={() => setShowToast(false)}
+        />
+      )}
+      
       {cart.items.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
@@ -199,6 +199,54 @@ export default function CartView() {
             />
             <button onClick={handleApplyCoupon}>Apply</button>
           </div>
+
+          {availableCoupons.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <div style={{ fontSize: 12, fontWeight: "bold", color: "#666", marginBottom: 6 }}>
+                Available Coupons:
+              </div>
+              {availableCoupons.map((coupon) => (
+                <div
+                  key={coupon.code}
+                  style={{
+                    backgroundColor: "#f0f8ff",
+                    border: "1px solid #87ceeb",
+                    borderRadius: 6,
+                    padding: 10,
+                    marginBottom: 8,
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center"
+                  }}
+                >
+                  <div>
+                    <div style={{ fontFamily: "monospace", fontWeight: "bold", fontSize: 14 }}>
+                      {coupon.code}
+                    </div>
+                    <div style={{ fontSize: 12, color: "#0066cc" }}>
+                      {coupon.discountPercent}% off on entire order
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setCouponInput(coupon.code);
+                    }}
+                    style={{
+                      padding: "6px 12px",
+                      fontSize: 12,
+                      backgroundColor: "#87ceeb",
+                      border: "1px solid #0066cc",
+                      borderRadius: 4,
+                      cursor: "pointer",
+                      fontWeight: "bold"
+                    }}
+                  >
+                    Use
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
 
           <div style={{ marginTop: 16 }}>
             <button onClick={handleCheckout} disabled={checkoutLoading}>
