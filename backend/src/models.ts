@@ -38,4 +38,5 @@ export interface Coupon {
   issuedForOrderId?: string | null;
   issuedToUserId?: string | null;
   usedByOrderId?: string | null;
+  expiredAt?: string | null;
 }

@@ -1,7 +1,7 @@
 import express from "express";
 import { addItemToCart, getCart, saveCart, removeItemFromCart, reduceItemQuantity } from "../services/cartService";
 import { getProduct } from "../services/productService";
-import { getAvailableCoupons } from "../services/couponService";
+import { getAvailableCoupons, getCoupon } from "../services/couponService";
 
 const router = express.Router();
 
@@ -27,11 +27,45 @@ router.post("/apply-coupon", async (req, res) => {
   const userId = req.header("x-user-id");
   const { couponCode } = req.body;
 
+  // Validate coupon
+  const coupon = await getCoupon(couponCode);
+
+  if (!coupon) {
+    return res.status(400).json({ 
+      message: "❌ Coupon not found",
+      valid: false,
+      code: couponCode
+    });
+  }
+
+  if (coupon.used) {
+    return res.status(400).json({ 
+      message: "❌ This coupon has already been used",
+      valid: false,
+      code: couponCode
+    });
+  }
+
+  if (coupon.expiredAt) {
+    return res.status(400).json({ 
+      message: "❌ This coupon has expired",
+      valid: false,
+      code: couponCode
+    });
+  }
+
+  // Valid coupon - apply it
   const cart = await getCart(userId!);
   cart.appliedCoupon = couponCode;
   await saveCart(cart);
 
-  res.json({ message: "Coupon applied", cart });
+  res.json({ 
+    message: `✓ Coupon applied successfully! ${coupon.discountPercent}% discount will be applied at checkout.`,
+    valid: true,
+    code: couponCode,
+    discountPercent: coupon.discountPercent,
+    cart
+  });
 });
 
 router.post("/items/:productId/remove", async (req, res) => {

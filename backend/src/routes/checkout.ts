@@ -8,6 +8,7 @@ import {
   getCoupon,
   markCouponUsed,
   generateNthOrderCoupon,
+  expireUnusedCoupons,
 } from "../services/couponService";
 
 const router = express.Router();
@@ -63,6 +64,8 @@ router.post("/", async (req, res) => {
     let newCoupon = null;
     const N = 3;
     if (orderCount % N === 0) {
+      // Expire any unused coupons before generating new one
+      await expireUnusedCoupons();
       newCoupon = await generateNthOrderCoupon(order.id, userId);
     }
 

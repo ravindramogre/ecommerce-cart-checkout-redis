@@ -40,11 +40,24 @@ export async function getAvailableCoupons() {
 
   for (const code of allCouponIds) {
     const c = await getCoupon(code);
-    if (c && !c.used) {
+    // Show only unused and non-expired coupons
+    if (c && !c.used && !c.expiredAt) {
       available.push(c);
     }
   }
 
   // Return only the most recent available coupon (max 1)
   return available.length > 0 ? [available[available.length - 1]] : [];
+}
+
+export async function expireUnusedCoupons() {
+  const allCouponIds = await redis.lrange("coupons:ids", 0, -1);
+
+  for (const code of allCouponIds) {
+    const c = await getCoupon(code);
+    if (c && !c.used && !c.expiredAt) {
+      c.expiredAt = new Date().toISOString();
+      await redis.set(`coupon:${code}`, JSON.stringify(c));
+    }
+  }
 }

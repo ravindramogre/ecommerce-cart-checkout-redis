@@ -29,7 +29,7 @@ export default function CartView() {
       await applyCoupon(couponInput.trim());
       setCouponInput("");
       await refresh();
-      alert("Coupon applied (if valid on backend)");
+      alert("Coupon applied successfully!");
     } catch (e) {
       console.error(e);
       const msg = e?.response?.data?.message || "Failed to apply coupon";
